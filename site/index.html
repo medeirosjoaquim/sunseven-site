@@ -1,37 +1,477 @@
 <!DOCTYPE html>
-
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>NGINX on Railway</title>
-    <meta name="description" content="Choo Choo!" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SunSeven - Software Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Theme Variables */
+        :root {
+            --background: 220 50% 3%;
+            --foreground: 140 100% 86%;
+            --card: 220 50% 5%;
+            --slate-800: 217 33% 17%;
+            --slate-900: 222 47% 11%;
+            
+            /* High contrast theme variables */
+            --high-contrast-background: 0 0% 0%;
+            --high-contrast-foreground: 0 0% 100%;
+            --high-contrast-accent: 60 100% 50%;
+            --high-contrast-border: 0 0% 100%;
+            --card-foreground: 140 100% 86%;
+            --popover: 220 50% 3%;
+            --popover-foreground: 140 100% 86%;
+            --primary: 140 100% 86%;
+            --primary-foreground: 220 50% 3%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 140 100% 86%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 140 70% 75%;
+            --accent: 140 100% 50%;
+            --accent-foreground: 220 50% 3%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            --input: 217.2 32.6% 17.5%;
+            --ring: 212.7 26.8% 83.9%;
+            --bg-secondary: hsl(220 50% 5%);
+            --text-primary: hsl(140 100% 86%);
+            --text-secondary: hsl(140 70% 75%);
+            --accent-hover: hsl(140 100% 45%);
+            --matrix-line: rgba(51, 255, 119, 0.15);
+            --matrix-glow: rgba(51, 255, 119, 0.03);
+            --scrollbar-track: rgba(51, 255, 119, 0.05);
+            --scrollbar-thumb: rgba(51, 255, 119, 0.2);
+            --scrollbar-thumb-hover: rgba(51, 255, 119, 0.3);
+        }
 
-    <link rel="icon" href="https://sunseven.cc/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        /* Base styles */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            min-height: 100vh;
+            width: 100vw;
+            position: relative;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-    <link rel="stylesheet" href="https://sunseven.cc/styles.css?v=1.0" />
-  </head>
+        .logo, .nav-links {
+            font-family: 'Press Start 2P', cursive;
+        }
 
-  <body>
-    <main>
-      <img
-        src="https://railway.app/brand/logo-light.svg"
-        alt="Railway logo"
-        class="logo"
-      />
+        /* Matrix effects */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 70px; /* Height of the navbar */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: repeating-linear-gradient(
+                0deg,
+                var(--matrix-line),
+                var(--matrix-line) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
 
-      <h1>NGINX on Railway</h1>
+        body::after {
+            content: "";
+            position: fixed;
+            top: 70px; /* Height of the navbar */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: linear-gradient(
+                var(--matrix-glow),
+                rgba(51, 255, 119, 0.02)
+            );
+            pointer-events: none;
+            z-index: 2;
+        }
 
-      <p>
-        Choo Choo! This is an example of an NGINX static site running on
-        Railway.
-        <a
-          href="https://github.com/railwayapp/starters/tree/master/examples/nginx"
-          >View source</a
-        >.
-      </p>
-    </main>
+        /* Scrollbar */
+        .matrix-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
 
-    <script src="https://sunseven.cc/script.js"></script>
-  </body>
+        .matrix-scrollbar::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+
+        .matrix-scrollbar::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+
+        .matrix-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scrollbar-thumb-hover);
+        }
+
+        /* Layout styles */
+        .nav-container {
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+            background: hsl(var(--slate-900));
+            box-sizing: border-box;
+            border-bottom: 1px solid hsl(var(--slate-800));
+            backdrop-filter: blur(8px);
+        }
+
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+
+        .parallax-wrapper {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .hero-section .text-secondary {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--accent);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 2.5rem;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .service-card {
+            padding: 2rem;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border);
+            background-color: var(--bg-secondary);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        /* Buttons */
+        .contrast-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: var(--foreground);
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .contrast-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .contrast-toggle:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        /* High contrast theme */
+        [data-theme="high-contrast"] {
+            --background: var(--high-contrast-background);
+            --foreground: var(--high-contrast-foreground);
+            --accent: var(--high-contrast-accent);
+            --border: var(--high-contrast-border);
+        }
+
+        [data-theme="high-contrast"] body::before,
+        [data-theme="high-contrast"] body::after {
+            display: none;
+        }
+
+        .cta-button, .contact-button {
+            background-color: var(--accent);
+            color: var(--accent-foreground);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover, .contact-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 3rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="matrix-scrollbar">
+    <header class="nav-container">
+            <nav class="main-nav" role="navigation">
+                <div class="logo" role="banner">SunSeven</div>
+                <ul class="nav-links" role="menubar">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <button id="contrast-toggle" class="contrast-toggle" aria-label="Toggle high contrast mode" aria-pressed="false">
+                    <span class="contrast-icon" style="font-size: 1.5rem;">🌓</span>
+                </button>
+            </nav>
+        </header>
+
+        <main>
+            <section id="hero" class="hero-section">
+                <div class="parallax-wrapper">
+                    <h1>SunSeven</h1>
+                    <p class="text-secondary">Innovative Software Solutions from Curitiba</p>
+                    <div class="cta-container">
+                        <button class="cta-button">Get Started</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about" class="section bg-card">
+                <h2>About Us</h2>
+                <p>Based in Curitiba, Paraná, we are a passionate team of developers dedicated to transforming innovative ideas into powerful software solutions. With expertise in cutting-edge technologies and a commitment to excellence, we help businesses navigate the digital landscape and achieve their technological goals.</p>
+                <p>Our approach combines technical prowess with creative problem-solving, ensuring that every solution we deliver is not just functional, but revolutionary.</p>
+            </section>
+
+            <section id="services" class="section">
+                <h2>Our Services</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <h3>Custom Development</h3>
+                        <p>Tailored solutions crafted to perfectly match your business requirements. From web applications to enterprise software, we build scalable and maintainable solutions using cutting-edge technologies.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Cloud Solutions</h3>
+                        <p>Expert cloud architecture and deployment services. We help you leverage the power of AWS, Azure, or Google Cloud to build resilient, scalable, and cost-effective infrastructure.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Mobile Apps</h3>
+                        <p>Beautiful and performant mobile applications for iOS and Android. Using React Native and Flutter, we create cross-platform apps that provide native-like experience while maintaining development efficiency.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" class="section">
+                <h2>Projects</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <h3>Enterprise Java Solutions</h3>
+                        <p>Specialized in Spring Boot microservices, JPA/Hibernate, and building robust enterprise applications. Our Java expertise ensures high-performance, scalable backend systems that power mission-critical operations.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>TypeScript Applications</h3>
+                        <p>Modern web applications built with TypeScript, React, and Node.js. We leverage the type safety and modern features of TypeScript to create maintainable, enterprise-grade frontend and backend solutions.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Full-Stack Integration</h3>
+                        <p>Seamless integration between Java backends and TypeScript frontends. Our expertise in both ecosystems allows us to create cohesive, end-to-end solutions that maximize development efficiency and application performance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="section bg-card">
+                <h2>Contact Us</h2>
+                <div class="contact-info">
+                    <p>Curitiba, Paraná - Brazil</p>
+                    <button class="contact-button">Send Message</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 SunSeven. All rights reserved.</p>
+        </footer>
+
+    <script>
+        // High contrast toggle functionality
+        const contrastToggle = document.getElementById('contrast-toggle');
+        const body = document.documentElement;
+        
+        // Check for saved preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+            contrastToggle.setAttribute('aria-pressed', savedTheme === 'high-contrast');
+        } else {
+            // Set default theme
+            body.setAttribute('data-theme', 'default');
+            contrastToggle.setAttribute('aria-pressed', 'false');
+        }
+
+        contrastToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'default' ? 'high-contrast' : 'default';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update aria-pressed state
+            contrastToggle.setAttribute('aria-pressed', newTheme === 'high-contrast');
+            
+            // Announce theme change to screen readers
+            const announcement = document.createElement('div');
+            announcement.setAttribute('role', 'status');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.textContent = `Theme changed to ${newTheme}`;
+            document.body.appendChild(announcement);
+            setTimeout(() => announcement.remove(), 1000);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Nav bar background opacity on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav-container');
+            if (window.scrollY > 100) {
+                nav.style.backdropFilter = 'blur(12px)';
+            } else {
+                nav.style.backdropFilter = 'blur(8px)';
+            }
+        });
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const parallaxWrapper = document.querySelector('.parallax-wrapper');
+            const scrolled = window.pageYOffset;
+            parallaxWrapper.style.transform = `translateY(${scrolled * 0.3}px)`;
+        });
+
+        // Initialize interactive elements
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctaButton = document.querySelector('.cta-button');
+            const contactButton = document.querySelector('.contact-button');
+            
+            ctaButton.addEventListener('click', () => {
+                document.querySelector('#contact').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+            
+            contactButton.addEventListener('click', () => {
+                alert('Contact form coming soon!');
+            });
+        });
+    </script>
+</body>
 </html>
